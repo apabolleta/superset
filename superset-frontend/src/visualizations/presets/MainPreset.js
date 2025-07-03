@@ -82,6 +82,7 @@ import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
 import { FilterPlugins } from 'src/constants';
 import AgGridTableChartPlugin from '@superset-ui/plugin-chart-ag-grid-table';
 import TimeTableChartPlugin from '../TimeTable';
+import { DataGridChartPlugin } from '@superset-ui/plugin-chart-data-grid';
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -191,6 +192,7 @@ export default class MainPreset extends Preset {
             },
           ],
         }).configure({ key: VizType.Cartodiagram }),
+        new DataGridChartPlugin().configure({ key: VizType.DataGrid }),
         ...experimentalPlugins,
         ...agGridTablePlugin,
       ],
