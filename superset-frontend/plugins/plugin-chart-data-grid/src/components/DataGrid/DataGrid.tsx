@@ -17,9 +17,12 @@
  * under the License.
  */
 import { useRef } from 'react';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { Flex, Input, Space } from '@superset-ui/core/components';
 import { DataRecord, styled, t } from '@superset-ui/core';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 export interface ColumnDef<D extends DataRecord = DataRecord> {}
 
