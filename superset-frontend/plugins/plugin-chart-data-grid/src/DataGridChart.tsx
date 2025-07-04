@@ -35,15 +35,13 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
     width,
     height,
     formData,
-    columns,
-    data,
+    dataGrid,
   } = props;
   const {
-    pagination,
-    pagination_page_size,
-    sorting,
-    filtering,
-    searching,
+    is_editable,
+    allow_update,
+    allow_insert,
+    allow_delete,
   } = formData;
 
   const rootElem = createRef<HTMLDivElement>();
@@ -55,13 +53,10 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
   return (
     <Styles ref={rootElem} width={width} height={height}>
       <DataGrid
-        columns={columns}
-        data={data}
-        pagination={pagination}
-        paginationPageSize={pagination_page_size}
-        sorting={sorting}
-        filtering={filtering}
-        searching={searching}
+        {...dataGrid}
+        onUpdate={is_editable && allow_update ? handleUpdate : undefined}
+        onInsert={is_editable && allow_insert ? handleInsert : undefined}
+        onDelete={is_editable && allow_delete ? handleDelete : undefined}
       />
     </Styles>
   );

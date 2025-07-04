@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DataGridChartProps, DataGridChartTransformedProps } from '../types';
+import {
+  ColumnDef,
+  DataGridChartProps,
+  DataGridChartTransformedProps,
+  DataGridDef
+} from '../types';
 
 export default function transformProps(
   chartProps: DataGridChartProps
@@ -25,20 +30,30 @@ export default function transformProps(
     width,
     height,
     rawFormData: formData,
-    queriesData
+    queriesData,
   } = chartProps;
 
-  const columns = queriesData[0].colnames.map((item) => ({
-    field: item,
+  const columns: ColumnDef[] = queriesData[0].colnames.map((item) => ({
+    key: item,
+    header: item,
   }));
 
   const data = queriesData[0].data;
+
+  const dataGrid: DataGridDef = {
+    columns,
+    data,
+    pagination: formData.pagination,
+    paginationPageSize: formData.pagination_page_size,
+    sorting: formData.sorting,
+    filtering: formData.filtering,
+    searching: formData.searching,
+  };
 
   return {
     width,
     height,
     formData,
-    columns,
-    data,
+    dataGrid,
   };
 }

@@ -28,8 +28,10 @@ import {
   allowUpdateControlSetItem,
   canEditable,
   columnConfigControlSetItem,
+  exportingControlSetItem,
   filteringControlSetItem,
   groupByControlSetItem,
+  importingControlSetItem,
   isEditableControlSetItem,
   keyColumnControlSetItem,
   metricsControlSetItem,
@@ -39,8 +41,12 @@ import {
   paginationPageSizeControlSetItem,
   queryModeControlSetItem,
   searchingControlSetItem,
+  selectionControlSetItem,
+  selectionModeControlSetItem,
+  selectionTypeControlSetItem,
   seriesLimitMetricControlSetItem,
   sortingControlSetItem,
+  sortingModeControlSetItem,
 } from './controls';
 
 const config: ControlPanelConfig = {
@@ -76,11 +82,25 @@ const config: ControlPanelConfig = {
       label: t('Options'),
       expanded: true,
       controlSetRows: [
-        [paginationControlSetItem],
-        [paginationPageSizeControlSetItem],
-        [sortingControlSetItem],
+        [
+          paginationControlSetItem,
+          paginationPageSizeControlSetItem
+        ],
+        [
+          selectionControlSetItem,
+          selectionTypeControlSetItem,
+          selectionModeControlSetItem
+        ],
+        [
+          sortingControlSetItem,
+          sortingModeControlSetItem
+        ],
         [filteringControlSetItem],
         [searchingControlSetItem],
+        [
+          importingControlSetItem,
+          exportingControlSetItem
+        ],
         [columnConfigControlSetItem],
       ],
     },

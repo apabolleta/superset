@@ -17,30 +17,42 @@
  * under the License.
  */
 import { useRef } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { Flex, Input, Space } from '@superset-ui/core/components';
 import { DataRecord, styled, t } from '@superset-ui/core';
+import { DataGridDef, RowIndex } from 'src/types';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export interface ColumnDef<D extends DataRecord = DataRecord> {}
+export type UpdateEvent<D extends DataRecord = DataRecord> = {
+  updates: {
+    newData: Partial<D>;
+    oldData: Partial<D>;
+    rowIndex: RowIndex;
+  }[];
+};
 
-export type UpdateEvent = {};
-export type InsertEvent = {};
-export type DeleteEvent = {};
+export type InsertEvent<D extends DataRecord = DataRecord> = {
+  inserts: {
+    newData: D;
+    rowIndex?: RowIndex;
+  }[];
+};
 
-export interface DataGridProps<D extends DataRecord = DataRecord> {
-  columns: ColumnDef<D>[];
-  data: D[];
-  pagination?: boolean;
-  paginationPageSize?: number;
-  sorting?: boolean;
-  filtering?: boolean;
-  searching?: boolean;
-  onUpdate?: ((event: UpdateEvent) => void) | null;
-  onInsert?: ((event: InsertEvent) => void) | null;
-  onDelete?: ((event: DeleteEvent) => void) | null;
+export type DeleteEvent<D extends DataRecord = DataRecord> = {
+  deletes: {
+    oldData: D;
+    rowIndex: RowIndex;
+  }[];
+};
+
+export interface DataGridProps<
+  D extends DataRecord = DataRecord
+> extends DataGridDef<D> {
+  onUpdate?: (event: UpdateEvent<D>) => void;
+  onInsert?: (event: InsertEvent<D>) => void;
+  onDelete?: (event: DeleteEvent<D>) => void;
 }
 
 const DataGridContainer = styled(Flex)`
@@ -57,18 +69,33 @@ const DataGridContentContainer = styled.div`
 `;
 
 export default function DataGrid<D extends DataRecord = DataRecord>({
-  columns,
-  data,
+  columns: _columns,
+  data: _data,
   pagination,
   paginationPageSize,
+  selection,
+  selectionType,
+  selectionMode,
   sorting,
+  sortingMode,
   filtering,
   searching,
+  editable,
+  importing,
+  exporting,
   onUpdate,
   onInsert,
   onDelete,
 }: DataGridProps<D>) {
   const gridRef = useRef<AgGridReact>(null);
+
+  const columns: ColDef<D>[] = _columns.map((col) => ({
+    field: col.key as ColDef<D>['field'],
+    headerName: col.header,
+  }));
+
+  const data: D[] = _data.map((row) => ({ ...row }));
+
   return (
     <DataGridContainer vertical>
       <DataGridControlsContainer>
@@ -87,11 +114,12 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
           columnDefs={columns}
           defaultColDef={{
             sortable: sorting,
-            filter: filtering
+            filter: filtering,
+            editable: true,
           }}
           pagination={pagination}
           paginationAutoPageSize={paginationPageSize === 0}
-          paginationPageSize={paginationPageSize}
+          paginationPageSize={paginationPageSize ?? undefined}
           paginationPageSizeSelector={!paginationPageSize}
         />
       </DataGridContentContainer>

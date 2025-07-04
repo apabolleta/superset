@@ -36,6 +36,7 @@ import {
   QueryFormColumn,
   QueryMode,
   t,
+  validateNonEmpty,
 } from '@superset-ui/core';
 import { isEmpty } from 'lodash';
 
@@ -276,8 +277,9 @@ export const allowDeleteControlSetItem: ControlSetItem = {
 };
 
 export const keyColumnControlSetItem: ControlSetItem = {
-  name: 'entity',
-  override: {
+  name: 'key_column',
+  config: {
+    ...sharedControls.entity,
     label: t('Key column'),
     description: t('Column that uniquely identifies rows'),
     validators: [],
@@ -311,10 +313,56 @@ export const paginationPageSizeControlSetItem: ControlSetItem = {
   config: {
     type: 'SelectControl',
     label: t('Page size'),
-    description: t('Pagination page size'),
     choices: PAGINATION_PAGE_SIZE_OPTIONS,
     renderTrigger: true,
     visibility: ({ controls }) => controls?.pagination?.value === true,
+  }
+};
+
+export const selectionControlSetItem: ControlSetItem = {
+  name: 'selection',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Selection'),
+    description: t('Enable selection'),
+    renderTrigger: true,
+  }
+};
+
+export const selectionTypeControlSetItem: ControlSetItem = {
+  name: 'selection_type',
+  config: {
+    type: 'SelectControl',
+    label: t('Selection type'),
+    choices: [
+      ['row', t('Row')],
+      ['column', t('Column')],
+      ['range', t('Range')],
+      ['cell', t('Cell')],
+    ],
+    default: null,
+    clearable: true,
+    renderTrigger: true,
+    visibility: ({ controls }) => controls?.selection?.value === true,
+    resetOnHide: false,
+  }
+};
+
+export const selectionModeControlSetItem: ControlSetItem = {
+  name: 'selection_mode',
+  config: {
+    type: 'SelectControl',
+    label: t('Selection mode'),
+    choices: [
+      ['single', t('Single')],
+      ['multiple', t('Multiple')],
+    ],
+    default: 'single',
+    clearable: false,
+    validators: [validateNonEmpty],
+    renderTrigger: true,
+    visibility: ({ controls }) => controls?.selection?.value === true,
+    resetOnHide: false,
   }
 };
 
@@ -325,6 +373,24 @@ export const sortingControlSetItem: ControlSetItem = {
     label: t('Sorting'),
     description: t('Enable sorting'),
     renderTrigger: true,
+  }
+};
+
+export const sortingModeControlSetItem: ControlSetItem = {
+  name: 'sorting_mode',
+  config: {
+    type: 'SelectControl',
+    label: t('Sorting mode'),
+    choices: [
+      ['single', t('Single')],
+      ['multiple', t('Multiple')],
+    ],
+    default: 'single',
+    clearable: false,
+    validators: [validateNonEmpty],
+    renderTrigger: true,
+    visibility: ({ controls }) => controls?.sorting?.value === true,
+    resetOnHide: false,
   }
 };
 
@@ -344,6 +410,26 @@ export const searchingControlSetItem: ControlSetItem = {
     type: 'CheckboxControl',
     label: t('Searching'),
     description: t('Enable searching'),
+    renderTrigger: true,
+  }
+};
+
+export const importingControlSetItem: ControlSetItem = {
+  name: 'importing',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Importing'),
+    description: t('Enable importing'),
+    renderTrigger: true,
+  }
+};
+
+export const exportingControlSetItem: ControlSetItem = {
+  name: 'exporting',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Exporting'),
+    description: t('Enable exporting'),
     renderTrigger: true,
   }
 };
