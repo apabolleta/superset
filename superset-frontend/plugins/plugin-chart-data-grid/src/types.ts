@@ -166,8 +166,14 @@ export type DataGridDef<D extends DataRecord = DataRecord> = {
   exporting?: boolean;
 };
 
-// TODO: define column configurable parameters
-type ColumnConfig = {};
+type ColumnConfig = {
+  header?: string;
+  visible?: boolean;
+  sortable?: boolean;
+  filterable?: boolean;
+  editable?: boolean;
+};
+
 // TODO: define formatting configurable parameters
 type FormattingConfig = {};
 
