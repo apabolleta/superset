@@ -39,6 +39,8 @@ type SelectionMode = 'single' | 'multiple';
 
 type SortingMode = 'single' | 'multiple';
 
+type CellStyle = CSSStyleDeclaration | { [key: string]: string };
+
 export type RowIndex = number | string | Date;
 
 // TODO: define data format type
@@ -99,6 +101,12 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
 
   /** Custom CSS class for the column */
   className?: string;
+
+  /** Custom CSS class for the column header */
+  headerClassName?: string;
+
+  /** Custom style for column cells */
+  cellStyle?: CellStyle | ((value: D[keyof D], rowData: D, rowIndex: RowIndex) => CellStyle | undefined);
 
   /** Custom function to format export data */
   exportFormatter?: (value: D[keyof D], rowData: D, rowIndex: RowIndex) => string;
