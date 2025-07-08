@@ -242,7 +242,7 @@ export const isEditableControlSetItem: ControlSetItem = {
     label: t('Editable'),
     description: t('If enabled, this control allows interactive editing'),
     visibility: canEditable,
-    rerender: ['allow_update', 'allow_insert', 'allow_delete'],
+    rerender: ['key_column', 'allow_update', 'allow_insert', 'allow_delete'],
   }
 };
 
@@ -279,10 +279,19 @@ export const allowDeleteControlSetItem: ControlSetItem = {
 export const keyColumnControlSetItem: ControlSetItem = {
   name: 'key_column',
   config: {
-    ...sharedControls.entity,
+    ...sharedControls.groupby,
     label: t('Key column'),
     description: t('Column that uniquely identifies rows'),
-    validators: [],
+    multi: false,
+    mapStateToProps: (state, controlState) => {
+      const { controls } = state;
+      const originalMapStateToProps = sharedControls?.groupby?.mapStateToProps;
+      const newState = originalMapStateToProps?.(state, controlState) ?? {};
+      newState.externalValidationErrors = isEditable({ controls }) && ensureIsArray(controlState.value).length === 0
+        ? [t('must have a value')]
+        : [];
+      return newState;
+    },
     visibility: isEditable,
     resetOnHide: false,
   },
