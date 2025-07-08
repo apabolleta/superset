@@ -195,11 +195,11 @@ export type DataGridChartFormData = QueryFormData &
     row_limit?: string | number | null;
     adhoc_filters?: AdhocFilter[] | null;
     // interactivity
-    is_editable?: boolean;
+    is_editable?: boolean | null;
     key_column?: QueryFormColumn[] | QueryFormColumn | null;
-    allow_update?: boolean;
-    allow_insert?: boolean;
-    allow_delete?: boolean;
+    allow_update?: boolean | null;
+    allow_insert?: boolean | null;
+    allow_delete?: boolean | null;
     // options
     pagination?: boolean;
     pagination_page_size?: number;
