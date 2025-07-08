@@ -23,10 +23,13 @@ import {
 } from '@superset-ui/core';
 
 export default function buildQuery(formData: QueryFormData) {
-  return buildQueryContext(formData, baseQueryObject => [
-    {
-      ...baseQueryObject,
-      orderby: normalizeOrderBy(baseQueryObject).orderby,
-    },
-  ]);
+  return buildQueryContext(formData, {
+    buildQuery: baseQueryObject => [
+      {
+        ...baseQueryObject,
+        orderby: normalizeOrderBy(baseQueryObject).orderby,
+      },
+    ],
+    queryFields: {'key_column': 'columns'}
+  });
 }
