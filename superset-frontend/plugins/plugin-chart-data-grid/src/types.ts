@@ -39,6 +39,8 @@ type SelectionMode = 'single' | 'multiple';
 
 type SortingMode = 'single' | 'multiple';
 
+type TextAlign = 'start' | 'end' | 'center';
+
 type CellStyle = CSSStyleDeclaration | { [key: string]: string };
 
 export type RowIndex = number | string | Date;
@@ -95,6 +97,9 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
 
   /** Fixed column width */
   width?: number | string;
+
+  /** Text horizontal alignment */
+  textAlign?: TextAlign;
 
   /** Tooltip or helper text for the header */
   tooltip?: string | ((value: D[keyof D], rowData: D, rowIndex: RowIndex) => React.ReactNode);
