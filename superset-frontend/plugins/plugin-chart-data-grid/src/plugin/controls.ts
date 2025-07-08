@@ -89,11 +89,11 @@ export function checkEditable(controls: ControlStateMapping) {
 }
 
 export function getEditable(controls: ControlStateMapping) {
-  return checkEditable(controls) && controls?.is_editable?.value;
+  return checkEditable(controls) ? !!controls?.is_editable?.value : null;  // null if cannot be editable
 }
 
 export const canEditable = ({ controls }: Pick<ControlPanelsContainerProps, 'controls'>) =>
-  checkEditable(controls) === true;
+  getEditable(controls) !== null;
 
 export const isEditable = ({ controls }: Pick<ControlPanelsContainerProps, 'controls'>) =>
   getEditable(controls) === true;
@@ -110,7 +110,7 @@ const queryMode: ControlConfig<'RadioButtonControl'> = {
     [QueryMode.Raw, QueryModeLabel[QueryMode.Raw]],
   ],
   mapStateToProps: ({ controls }) => ({ value: getQueryMode(controls) }),
-  rerender: ['all_columns', 'groupby', 'metrics'],
+  rerender: ['groupby', 'metrics', 'all_columns', 'is_editable'],
 };
 
 export const queryModeControlSetItem: ControlSetItem = {
