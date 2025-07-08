@@ -182,7 +182,7 @@ export type DataGridChartFormData = QueryFormData &
     adhoc_filters?: AdhocFilter[] | null;
     // interactivity
     is_editable?: boolean;
-    key_column?: QueryFormColumn | null;
+    key_column?: QueryFormColumn[] | QueryFormColumn | null;
     allow_update?: boolean;
     allow_insert?: boolean;
     allow_delete?: boolean;
