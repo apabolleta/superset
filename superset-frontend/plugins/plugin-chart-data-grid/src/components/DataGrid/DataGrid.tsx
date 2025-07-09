@@ -115,12 +115,19 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
           defaultColDef={{
             sortable: sorting,
             filter: filtering,
-            editable: true,
+            editable: editable,
           }}
           pagination={pagination}
           paginationAutoPageSize={paginationPageSize === 0}
           paginationPageSize={paginationPageSize ?? undefined}
           paginationPageSizeSelector={!paginationPageSize}
+          rowSelection={
+            selection && selectionType === 'row'
+              ? { mode: selectionMode === 'single' ? 'singleRow' : 'multiRow' }
+              : undefined
+          }
+          suppressMultiSort={sortingMode === 'single'}
+          alwaysMultiSort={sortingMode === 'multiple'}
         />
       </DataGridContentContainer>
     </DataGridContainer>

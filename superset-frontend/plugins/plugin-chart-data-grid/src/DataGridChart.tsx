@@ -38,7 +38,6 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
     dataGrid,
   } = props;
   const {
-    is_editable,
     allow_update,
     allow_insert,
     allow_delete,
@@ -54,9 +53,9 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
     <Styles ref={rootElem} width={width} height={height}>
       <DataGrid
         {...dataGrid}
-        onUpdate={is_editable && allow_update ? handleUpdate : undefined}
-        onInsert={is_editable && allow_insert ? handleInsert : undefined}
-        onDelete={is_editable && allow_delete ? handleDelete : undefined}
+        onUpdate={allow_update ? handleUpdate : undefined}
+        onInsert={allow_insert ? handleInsert : undefined}
+        onDelete={allow_delete ? handleDelete : undefined}
       />
     </Styles>
   );

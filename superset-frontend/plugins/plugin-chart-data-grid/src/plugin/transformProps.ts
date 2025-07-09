@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ensureIsArray } from '@superset-ui/core';
 import {
   ColumnDef,
   DataGridChartProps,
@@ -33,9 +34,11 @@ export default function transformProps(
     queriesData,
   } = chartProps;
 
-  const columns: ColumnDef[] = queriesData[0].colnames.map((item) => ({
+  const columns: ColumnDef[] = queriesData[0].colnames.map((item, index) => ({
     key: item,
     header: item,
+    dataType: queriesData[0].coltypes[index],
+    index: ensureIsArray(formData.key_column).includes(item) || undefined,
   }));
 
   const data = queriesData[0].data;
@@ -45,9 +48,14 @@ export default function transformProps(
     data,
     pagination: formData.pagination,
     paginationPageSize: formData.pagination_page_size,
+    selection: formData.selection,
+    selectionType: formData.selection_type,
+    selectionMode: formData.selection_mode,
     sorting: formData.sorting,
+    sortingMode: formData.sorting_mode,
     filtering: formData.filtering,
     searching: formData.searching,
+    editable: formData.is_editable ?? undefined,
   };
 
   return {

@@ -242,7 +242,7 @@ export const isEditableControlSetItem: ControlSetItem = {
     label: t('Editable'),
     description: t('If enabled, this control allows interactive editing'),
     visibility: canEditable,
-    rerender: ['key_column', 'allow_update', 'allow_insert', 'allow_delete'],
+    rerender: ['allow_update', 'allow_insert', 'allow_delete', 'key_column'],
   }
 };
 

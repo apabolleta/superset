@@ -35,9 +35,9 @@ type ColumnFilterType = 'text' | 'number' | 'date' | 'select' | 'custom' | null;
 
 type SelectionType = 'row' | 'column' | 'range' | 'cell' | null;
 
-type SelectionMode = 'single' | 'multiple';
+type SelectionMode = 'single' | 'multiple' | null;
 
-type SortingMode = 'single' | 'multiple';
+type SortingMode = 'single' | 'multiple' | null;
 
 type TextAlign = 'start' | 'end' | 'center';
 
@@ -64,6 +64,9 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
 
   /** Whether the column is the index for rows */
   index?: boolean;
+
+  /** Custom formatting function for cell data */
+  formatter?: (value: D[keyof D], rowData: D, rowIndex: RowIndex) => string;
 
   /** Whether the column is visible */
   visible?: boolean;
@@ -208,7 +211,11 @@ export type DataGridChartFormData = QueryFormData &
     // options
     pagination?: boolean;
     pagination_page_size?: number;
+    selection?: boolean;
+    selection_type?: SelectionType;
+    selection_mode?: SelectionMode;
     sorting?: boolean;
+    sorting_mode?: SortingMode;
     filtering?: boolean;
     searching?: boolean;
     column_config?: Record<string, ColumnConfig>;
