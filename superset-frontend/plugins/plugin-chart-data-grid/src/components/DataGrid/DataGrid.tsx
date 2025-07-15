@@ -17,39 +17,20 @@
  * under the License.
  */
 import { useRef } from 'react';
-import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { Flex, Input, Space } from '@superset-ui/core/components';
 import { DataRecord, styled, t } from '@superset-ui/core';
-import { DataGridDef, RowIndex } from 'src/types';
+import {
+  DataGridDef,
+  DeleteEvent,
+  InsertEvent,
+  UpdateEvent,
+} from 'src/types';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export type UpdateEvent<D extends DataRecord = DataRecord> = {
-  updates: {
-    newData: Partial<D>;
-    oldData: Partial<D>;
-    rowIndex: RowIndex;
-  }[];
-};
-
-export type InsertEvent<D extends DataRecord = DataRecord> = {
-  inserts: {
-    newData: D;
-    rowIndex?: RowIndex;
-  }[];
-};
-
-export type DeleteEvent<D extends DataRecord = DataRecord> = {
-  deletes: {
-    oldData: D;
-    rowIndex: RowIndex;
-  }[];
-};
-
-export interface DataGridProps<
-  D extends DataRecord = DataRecord
-> extends DataGridDef<D> {
+export interface DataGridProps<D extends DataRecord = DataRecord> extends DataGridDef<D> {
   onUpdate?: (event: UpdateEvent<D>) => void;
   onInsert?: (event: InsertEvent<D>) => void;
   onDelete?: (event: DeleteEvent<D>) => void;
@@ -89,12 +70,14 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
 }: DataGridProps<D>) {
   const gridRef = useRef<AgGridReact>(null);
 
-  const columns: ColDef<D>[] = _columns.map((col) => ({
-    field: col.key as ColDef<D>['field'],
+  const columns = _columns.map((col) => ({
+    field: col.key as string,
     headerName: col.header,
   }));
 
-  const data: D[] = _data.map((row) => ({ ...row }));
+  const data = _data.map((row) => ({
+    ...row,
+  }));
 
   return (
     <DataGridContainer vertical>

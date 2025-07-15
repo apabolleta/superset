@@ -18,7 +18,6 @@
  */
 import { ensureIsArray } from '@superset-ui/core';
 import {
-  ColumnDef,
   DataGridChartProps,
   DataGridChartTransformedProps,
   DataGridDef
@@ -34,16 +33,16 @@ export default function transformProps(
     queriesData,
   } = chartProps;
 
-  const columns: ColumnDef[] = queriesData[0].colnames.map((item, index) => ({
+  const columns = queriesData[0].colnames.map((item, index) => ({
     key: item,
     header: item,
     dataType: queriesData[0].coltypes[index],
-    index: ensureIsArray(formData.key_column).includes(item) || undefined,
+    index: ensureIsArray(formData.key_column).includes(item),
   }));
 
   const data = queriesData[0].data;
 
-  const dataGrid: DataGridDef = {
+  const dataGrid = {
     columns,
     data,
     pagination: formData.pagination,

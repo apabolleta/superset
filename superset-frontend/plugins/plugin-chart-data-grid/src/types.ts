@@ -29,6 +29,10 @@ import {
 } from '@superset-ui/core';
 import React from 'react';
 
+type ColumnId = number | string;
+
+type RowId = number | string | Date;
+
 type SortDirection = 'asc' | 'desc';
 
 type ColumnFilterType = 'text' | 'number' | 'date' | 'select' | 'custom' | null;
@@ -39,18 +43,16 @@ type SelectionMode = 'single' | 'multiple' | null;
 
 type SortingMode = 'single' | 'multiple' | null;
 
-type TextAlign = 'start' | 'end' | 'center';
+type TextAlign = 'left' | 'right' | 'center' | 'justify' | null;
 
-type CellStyle = CSSStyleDeclaration | { [key: string]: string };
-
-export type RowIndex = number | string | Date;
-
-// TODO: define data format type
-export type GenericDataFormat = {};
+type CellStyle = CSSStyleDeclaration | { [key: string]: string } | null;
 
 /** Column definition for data grid */
-export type ColumnDef<D extends DataRecord = DataRecord> = {
+export interface ColumnDef<D extends DataRecord = DataRecord> {
   /** Unique identifier for the column */
+  columnId?: ColumnId;
+
+  /** Key of the data record to get the column data from */
   key: keyof D | string;
 
   /** Display name for the column header */
@@ -59,14 +61,11 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
   /** Column data type */
   dataType?: GenericDataType;
 
-  /** Column data format */
-  dataFormat?: GenericDataFormat;
-
-  /** Whether the column is the index for rows */
-  index?: boolean;
+  /** Whether the column is the identifier for rows */
+  isRowId?: boolean;
 
   /** Custom formatting function for cell data */
-  formatter?: (value: D[keyof D], rowData: D, rowIndex: RowIndex) => string;
+  formatter?: (value: D[keyof D], rowData: D, rowId: RowId) => string;
 
   /** Whether the column is visible */
   visible?: boolean;
@@ -83,11 +82,11 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
   /** Whether the column can be filtered */
   filterable?: boolean;
 
-  /** Type of filter control */
+  /** Filter type */
   filterType?: ColumnFilterType;
 
   /** Custom rendering function for cell data */
-  render?: (value: D[keyof D], rowData: D, rowIndex: RowIndex) => React.ReactNode;
+  render?: (value: D[keyof D], rowData: D, rowId: RowId) => React.ReactNode;
 
   /** Whether the column can be resized */
   resizable?: boolean;
@@ -101,11 +100,14 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
   /** Fixed column width */
   width?: number | string;
 
-  /** Text horizontal alignment */
+  /** Text alignment */
   textAlign?: TextAlign;
 
-  /** Tooltip or helper text for the header */
-  tooltip?: string | ((value: D[keyof D], rowData: D, rowIndex: RowIndex) => React.ReactNode);
+  /** Tooltip for column cells */
+  tooltip?: React.ReactNode | ((value: D[keyof D], rowData: D, rowId: RowId) => React.ReactNode);
+
+  /** Tooltip for the column header */
+  headerTooltip?: React.ReactNode;
 
   /** Custom CSS class for the column */
   className?: string;
@@ -114,10 +116,13 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
   headerClassName?: string;
 
   /** Custom style for column cells */
-  cellStyle?: CellStyle | ((value: D[keyof D], rowData: D, rowIndex: RowIndex) => CellStyle | undefined);
+  style?: CellStyle | ((value: D[keyof D], rowData: D, rowId: RowId) => CellStyle);
+
+  /** Custom style for the column header */
+  headerStyle?: CellStyle;
 
   /** Custom function to format export data */
-  exportFormatter?: (value: D[keyof D], rowData: D, rowIndex: RowIndex) => string;
+  exportFormatter?: (value: D[keyof D], rowData: D, rowId: RowId) => string;
 
   /** Whether this column is included in exports */
   exportable?: boolean;
@@ -127,10 +132,10 @@ export type ColumnDef<D extends DataRecord = DataRecord> = {
 
   /** Children columns */
   children?: ColumnDef<D>[];
-};
+}
 
 /** Data grid definition */
-export type DataGridDef<D extends DataRecord = DataRecord> = {
+export interface DataGridDef<D extends DataRecord = DataRecord> {
   /** Column definitions */
   columns: ColumnDef<D>[];
 
@@ -172,6 +177,31 @@ export type DataGridDef<D extends DataRecord = DataRecord> = {
 
   /** Whether data exporting is enabled */
   exporting?: boolean;
+}
+
+/** Update event */
+export type UpdateEvent<D extends DataRecord = DataRecord> = {
+  updates: {
+    newData: Partial<D>;
+    oldData: Partial<D>;
+    rowId: RowId;
+  }[];
+};
+
+/** Insert event */
+export type InsertEvent<D extends DataRecord = DataRecord> = {
+  inserts: {
+    newData: D;
+    rowId?: RowId;
+  }[];
+};
+
+/** Delete event */
+export type DeleteEvent<D extends DataRecord = DataRecord> = {
+  deletes: {
+    oldData: D;
+    rowId: RowId;
+  }[];
 };
 
 type ColumnConfig = {

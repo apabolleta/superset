@@ -18,12 +18,14 @@
  */
 import { styled } from '@superset-ui/core';
 import { createRef } from 'react';
-import { DataGridChartStylesProps, DataGridChartTransformedProps } from './types';
-import DataGrid, {
+import {
+  DataGridChartStylesProps,
+  DataGridChartTransformedProps,
   DeleteEvent,
   InsertEvent,
   UpdateEvent,
-} from './components/DataGrid/DataGrid';
+} from './types';
+import DataGrid from './components/DataGrid/DataGrid';
 
 const Styles = styled.div<DataGridChartStylesProps>`
   width: ${({ width }) => width}px;
