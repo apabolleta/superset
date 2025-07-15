@@ -20,7 +20,6 @@ import { ensureIsArray } from '@superset-ui/core';
 import {
   DataGridChartProps,
   DataGridChartTransformedProps,
-  DataGridDef
 } from '../types';
 
 export default function transformProps(
@@ -37,7 +36,7 @@ export default function transformProps(
     key: item,
     header: item,
     dataType: queriesData[0].coltypes[index],
-    index: ensureIsArray(formData.key_column).includes(item),
+    isRowId: ensureIsArray(formData.key_columns).includes(item),
   }));
 
   const data = queriesData[0].data;
@@ -54,7 +53,7 @@ export default function transformProps(
     sortingMode: formData.sorting_mode,
     filtering: formData.filtering,
     searching: formData.searching,
-    editable: formData.is_editable ?? undefined,
+    editing: formData.is_editable ?? undefined,
   };
 
   return {

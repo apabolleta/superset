@@ -30,6 +30,6 @@ export default function buildQuery(formData: QueryFormData) {
         orderby: normalizeOrderBy(baseQueryObject).orderby,
       },
     ],
-    queryFields: {'key_column': 'columns'}
+    queryFields: {'key_columns': 'columns'}
   });
 }

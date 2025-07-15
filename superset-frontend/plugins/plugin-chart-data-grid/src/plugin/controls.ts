@@ -242,46 +242,17 @@ export const isEditableControlSetItem: ControlSetItem = {
     label: t('Editable'),
     description: t('If enabled, this control allows interactive editing'),
     visibility: canEditable,
-    rerender: ['allow_update', 'allow_insert', 'allow_delete', 'key_column'],
+    rerender: ['key_columns'],
   }
 };
 
-export const allowUpdateControlSetItem: ControlSetItem = {
-  name: 'allow_update',
-  config: {
-    type: 'CheckboxControl',
-    label: t('Allow update'),
-    description: t('Allows UPDATE operation'),
-    visibility: isEditable,
-  }
-};
-
-export const allowInsertControlSetItem: ControlSetItem = {
-  name: 'allow_insert',
-  config: {
-    type: 'CheckboxControl',
-    label: t('Allow insert'),
-    description: t('Allows INSERT operation'),
-    visibility: isEditable,
-  }
-};
-
-export const allowDeleteControlSetItem: ControlSetItem = {
-  name: 'allow_delete',
-  config: {
-    type: 'CheckboxControl',
-    label: t('Allow delete'),
-    description: t('Allows DELETE operation'),
-    visibility: isEditable,
-  }
-};
-
-export const keyColumnControlSetItem: ControlSetItem = {
-  name: 'key_column',
+export const keyColumnsControlSetItem: ControlSetItem = {
+  name: 'key_columns',
   config: {
     ...sharedControls.groupby,
-    label: t('Key column'),
-    description: t('Column that uniquely identifies rows'),
+    label: t('Key columns'),
+    description: t('Columns that uniquely identify rows'),
+    default: null,
     multi: false,
     mapStateToProps: (state, controlState) => {
       const { controls } = state;
@@ -295,6 +266,39 @@ export const keyColumnControlSetItem: ControlSetItem = {
     visibility: isEditable,
     resetOnHide: false,
   },
+};
+
+export const allowUpdateControlSetItem: ControlSetItem = {
+  name: 'allow_update',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Allow update'),
+    description: t('Allows UPDATE operation'),
+    renderTrigger: true,
+    visibility: isEditable,
+  }
+};
+
+export const allowInsertControlSetItem: ControlSetItem = {
+  name: 'allow_insert',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Allow insert'),
+    description: t('Allows INSERT operation'),
+    renderTrigger: true,
+    visibility: isEditable,
+  }
+};
+
+export const allowDeleteControlSetItem: ControlSetItem = {
+  name: 'allow_delete',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Allow delete'),
+    description: t('Allows DELETE operation'),
+    renderTrigger: true,
+    visibility: isEditable,
+  }
 };
 
 export const paginationControlSetItem: ControlSetItem = {

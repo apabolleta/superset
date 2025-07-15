@@ -32,8 +32,9 @@ import {
   filteringControlSetItem,
   groupByControlSetItem,
   importingControlSetItem,
+  isEditable,
   isEditableControlSetItem,
-  keyColumnControlSetItem,
+  keyColumnsControlSetItem,
   metricsControlSetItem,
   orderByColumnsControlSetItem,
   orderDescendingControlSetItem,
@@ -71,12 +72,19 @@ const config: ControlPanelConfig = {
       expanded: true,
       controlSetRows: [
         [isEditableControlSetItem],
-        [keyColumnControlSetItem],
+        [keyColumnsControlSetItem],
+      ],
+      visibility: canEditable
+    },
+    {
+      label: t('Permissions'),
+      expanded: true,
+      controlSetRows: [
         [allowUpdateControlSetItem],
         [allowInsertControlSetItem],
         [allowDeleteControlSetItem],
       ],
-      visibility: canEditable
+      visibility: isEditable
     },
     {
       label: t('Options'),

@@ -47,6 +47,10 @@ type TextAlign = 'left' | 'right' | 'center' | 'justify' | null;
 
 type CellStyle = CSSStyleDeclaration | { [key: string]: string } | null;
 
+type EditingType = 'row' | 'cell' | null;
+
+type EditingMode = 'single' | 'multiple' | null;
+
 /** Column definition for data grid */
 export interface ColumnDef<D extends DataRecord = DataRecord> {
   /** Unique identifier for the column */
@@ -170,7 +174,13 @@ export interface DataGridDef<D extends DataRecord = DataRecord> {
   searching?: boolean;
 
   /** Whether data can be edited */
-  editable?: boolean;
+  editing?: boolean;
+
+  /** Editing type */
+  editingType?: EditingType;
+
+  /** Editing mode */
+  editingMode?: EditingMode;
 
   /** Whether data importing is enabled */
   importing?: boolean;
@@ -204,13 +214,8 @@ export type DeleteEvent<D extends DataRecord = DataRecord> = {
   }[];
 };
 
-type ColumnConfig = {
-  header?: string;
-  visible?: boolean;
-  sortable?: boolean;
-  filterable?: boolean;
-  editable?: boolean;
-};
+// TODO: define column configurable parameters
+type ColumnConfig = {};
 
 // TODO: define formatting configurable parameters
 type FormattingConfig = {};
@@ -222,6 +227,7 @@ export interface DataGridChartStylesProps {
 
 export type DataGridChartFormData = QueryFormData &
   DataGridChartStylesProps & {
+    // query
     query_mode?: QueryMode;
     columns?: QueryFormColumn[] | null;
     groupby?: QueryFormColumn[] | null;
@@ -234,10 +240,11 @@ export type DataGridChartFormData = QueryFormData &
     adhoc_filters?: AdhocFilter[] | null;
     // interactivity
     is_editable?: boolean | null;
-    key_column?: QueryFormColumn[] | QueryFormColumn | null;
-    allow_update?: boolean | null;
-    allow_insert?: boolean | null;
-    allow_delete?: boolean | null;
+    key_columns?: QueryFormColumn[] | null;
+    // permissions
+    allow_update?: boolean;
+    allow_insert?: boolean;
+    allow_delete?: boolean;
     // options
     pagination?: boolean;
     pagination_page_size?: number;

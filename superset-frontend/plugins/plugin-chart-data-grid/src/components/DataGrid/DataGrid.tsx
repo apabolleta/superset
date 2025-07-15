@@ -61,7 +61,9 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
   sortingMode,
   filtering,
   searching,
-  editable,
+  editing,
+  editingType,
+  editingMode,
   importing,
   exporting,
   onUpdate,
@@ -98,7 +100,7 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
           defaultColDef={{
             sortable: sorting,
             filter: filtering,
-            editable: editable,
+            editable: editing,
           }}
           pagination={pagination}
           paginationAutoPageSize={paginationPageSize === 0}
@@ -111,6 +113,21 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
           }
           suppressMultiSort={sortingMode === 'single'}
           alwaysMultiSort={sortingMode === 'multiple'}
+          editType={editingType === 'row' ? 'fullRow' : undefined}
+          onCellValueChanged={
+            onUpdate
+              ? (event) => {
+                const { colDef, oldValue, newValue, data } = event;
+                onUpdate({
+                  updates: [{
+                    newData: {[colDef.field as keyof D]: newValue} as Partial<D>,
+                    oldData: {[colDef.field as keyof D]: oldValue} as Partial<D>,
+                    rowId: data?.[_columns.find(col => col.isRowId)?.key],
+                  }]
+                })
+              }
+              : undefined
+          }
         />
       </DataGridContentContainer>
     </DataGridContainer>
