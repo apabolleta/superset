@@ -21,14 +21,34 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { Flex, Input, Space } from '@superset-ui/core/components';
 import { DataRecord, styled, t } from '@superset-ui/core';
-import {
-  DataGridDef,
-  DeleteEvent,
-  InsertEvent,
-  UpdateEvent,
-} from 'src/types';
+import { DataGridDef, RowKey } from 'src/types';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+export interface UpdateEvent<D extends DataRecord = DataRecord> {
+  type: 'update',
+  updates: {
+    newData: Partial<D>;
+    oldData: Partial<D>;
+    rowKey: RowKey;
+  }[];
+}
+
+export interface InsertEvent<D extends DataRecord = DataRecord> {
+  type: 'insert',
+  inserts: {
+    newData: D;
+    rowKey?: RowKey;
+  }[];
+}
+
+export interface DeleteEvent<D extends DataRecord = DataRecord> {
+  type: 'delete',
+  deletes: {
+    oldData: D;
+    rowKey: RowKey;
+  }[];
+}
 
 export interface DataGridProps<D extends DataRecord = DataRecord> extends DataGridDef<D> {
   onUpdate?: (event: UpdateEvent<D>) => void;
@@ -119,10 +139,15 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
               ? (event) => {
                 const { colDef, oldValue, newValue, data } = event;
                 onUpdate({
+                  type: 'update',
                   updates: [{
                     newData: {[colDef.field as keyof D]: newValue} as Partial<D>,
                     oldData: {[colDef.field as keyof D]: oldValue} as Partial<D>,
-                    rowId: data?.[_columns.find(col => col.isRowId)?.key],
+                    rowKey: Object.fromEntries(
+                      _columns
+                        .filter(col => col.isRowKey)
+                        .map(col => [col.key, data[col.key]])
+                    )
                   }]
                 })
               }

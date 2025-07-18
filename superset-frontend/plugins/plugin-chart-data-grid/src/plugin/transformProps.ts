@@ -28,6 +28,7 @@ export default function transformProps(
   const {
     width,
     height,
+    datasource,
     rawFormData: formData,
     queriesData,
   } = chartProps;
@@ -36,7 +37,7 @@ export default function transformProps(
     key: item,
     header: item,
     dataType: queriesData[0].coltypes[index],
-    isRowId: ensureIsArray(formData.key_columns).includes(item),
+    isRowKey: ensureIsArray(formData.key_columns).includes(item),
   }));
 
   const data = queriesData[0].data;
@@ -59,6 +60,7 @@ export default function transformProps(
   return {
     width,
     height,
+    datasource,
     formData,
     dataGrid,
   };

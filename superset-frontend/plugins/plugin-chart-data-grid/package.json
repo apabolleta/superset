@@ -23,6 +23,9 @@
     "esm",
     "lib"
   ],
+  "dependencies": {
+    "kysely": "^0.28.2"
+  },
   "peerDependencies": {
     "@superset-ui/chart-controls": "*",
     "@superset-ui/core": "*",

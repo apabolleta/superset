@@ -21,6 +21,7 @@ import {
   ChartDataResponseResult,
   ChartProps,
   DataRecord,
+  Datasource,
   GenericDataType,
   QueryFormColumn,
   QueryFormData,
@@ -29,32 +30,32 @@ import {
 } from '@superset-ui/core';
 import React from 'react';
 
-type ColumnId = number | string;
+export type DataRecordKeyValue = number | string | Date;
 
-type RowId = number | string | Date;
+export type RowKey = { [key: string]: DataRecordKeyValue };
 
-type SortDirection = 'asc' | 'desc';
+export type SortDirection = 'asc' | 'desc';
 
-type ColumnFilterType = 'text' | 'number' | 'date' | 'select' | 'custom' | null;
+export type ColumnFilterType = 'text' | 'number' | 'date' | 'select' | 'custom' | null;
 
-type SelectionType = 'row' | 'column' | 'range' | 'cell' | null;
+export type SelectionType = 'row' | 'column' | 'range' | 'cell' | null;
 
-type SelectionMode = 'single' | 'multiple' | null;
+export type SelectionMode = 'single' | 'multiple' | null;
 
-type SortingMode = 'single' | 'multiple' | null;
+export type SortingMode = 'single' | 'multiple' | null;
 
-type TextAlign = 'left' | 'right' | 'center' | 'justify' | null;
+export type TextAlign = 'left' | 'right' | 'center' | 'justify' | null;
 
-type CellStyle = CSSStyleDeclaration | { [key: string]: string } | null;
+export type CellStyle = CSSStyleDeclaration | { [key: string]: string } | null;
 
-type EditingType = 'row' | 'cell' | null;
+export type EditingType = 'row' | 'cell' | null;
 
-type EditingMode = 'single' | 'multiple' | null;
+export type EditingMode = 'single' | 'multiple' | null;
 
 /** Column definition for data grid */
 export interface ColumnDef<D extends DataRecord = DataRecord> {
   /** Unique identifier for the column */
-  columnId?: ColumnId;
+  columnId?: string;
 
   /** Key of the data record to get the column data from */
   key: keyof D | string;
@@ -65,11 +66,11 @@ export interface ColumnDef<D extends DataRecord = DataRecord> {
   /** Column data type */
   dataType?: GenericDataType;
 
-  /** Whether the column is the identifier for rows */
-  isRowId?: boolean;
+  /** Whether the column is key identifier for rows */
+  isRowKey?: boolean;
 
   /** Custom formatting function for cell data */
-  formatter?: (value: D[keyof D], rowData: D, rowId: RowId) => string;
+  formatter?: (value: D[keyof D], rowData: D, rowKey: RowKey) => string;
 
   /** Whether the column is visible */
   visible?: boolean;
@@ -90,7 +91,7 @@ export interface ColumnDef<D extends DataRecord = DataRecord> {
   filterType?: ColumnFilterType;
 
   /** Custom rendering function for cell data */
-  render?: (value: D[keyof D], rowData: D, rowId: RowId) => React.ReactNode;
+  render?: (value: D[keyof D], rowData: D, rowKey: RowKey) => React.ReactNode;
 
   /** Whether the column can be resized */
   resizable?: boolean;
@@ -108,7 +109,7 @@ export interface ColumnDef<D extends DataRecord = DataRecord> {
   textAlign?: TextAlign;
 
   /** Tooltip for column cells */
-  tooltip?: React.ReactNode | ((value: D[keyof D], rowData: D, rowId: RowId) => React.ReactNode);
+  tooltip?: React.ReactNode | ((value: D[keyof D], rowData: D, rowKey: RowKey) => React.ReactNode);
 
   /** Tooltip for the column header */
   headerTooltip?: React.ReactNode;
@@ -120,13 +121,13 @@ export interface ColumnDef<D extends DataRecord = DataRecord> {
   headerClassName?: string;
 
   /** Custom style for column cells */
-  style?: CellStyle | ((value: D[keyof D], rowData: D, rowId: RowId) => CellStyle);
+  style?: CellStyle | ((value: D[keyof D], rowData: D, rowKey: RowKey) => CellStyle);
 
   /** Custom style for the column header */
   headerStyle?: CellStyle;
 
   /** Custom function to format export data */
-  exportFormatter?: (value: D[keyof D], rowData: D, rowId: RowId) => string;
+  exportFormatter?: (value: D[keyof D], rowData: D, rowKey: RowKey) => string;
 
   /** Whether this column is included in exports */
   exportable?: boolean;
@@ -189,31 +190,6 @@ export interface DataGridDef<D extends DataRecord = DataRecord> {
   exporting?: boolean;
 }
 
-/** Update event */
-export type UpdateEvent<D extends DataRecord = DataRecord> = {
-  updates: {
-    newData: Partial<D>;
-    oldData: Partial<D>;
-    rowId: RowId;
-  }[];
-};
-
-/** Insert event */
-export type InsertEvent<D extends DataRecord = DataRecord> = {
-  inserts: {
-    newData: D;
-    rowId?: RowId;
-  }[];
-};
-
-/** Delete event */
-export type DeleteEvent<D extends DataRecord = DataRecord> = {
-  deletes: {
-    oldData: D;
-    rowId: RowId;
-  }[];
-};
-
 // TODO: define column configurable parameters
 type ColumnConfig = {};
 
@@ -265,6 +241,7 @@ export interface DataGridChartProps extends ChartProps<DataGridChartFormData> {
 }
 
 export type DataGridChartTransformedProps = DataGridChartStylesProps & {
+  datasource: Datasource;
   formData: DataGridChartFormData;
   dataGrid: DataGridDef;
 };

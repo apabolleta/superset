@@ -16,16 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { styled } from '@superset-ui/core';
+import {
+  QueryFormData,
+  RequestConfig,
+  styled,
+  SupersetClient,
+} from '@superset-ui/core';
 import { createRef } from 'react';
+import {
+  DummyDriver,
+  Kysely,
+  PostgresAdapter,
+  PostgresIntrospector,
+  PostgresQueryCompiler,
+  RawBuilder,
+  sql,
+} from 'kysely';
 import {
   DataGridChartStylesProps,
   DataGridChartTransformedProps,
+} from './types';
+import DataGrid, {
   DeleteEvent,
   InsertEvent,
   UpdateEvent,
-} from './types';
-import DataGrid from './components/DataGrid/DataGrid';
+} from './components/DataGrid/DataGrid';
 
 const Styles = styled.div<DataGridChartStylesProps>`
   width: ${({ width }) => width}px;
@@ -36,6 +51,7 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
   const {
     width,
     height,
+    datasource,
     formData,
     dataGrid,
   } = props;
@@ -47,7 +63,53 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
 
   const rootElem = createRef<HTMLDivElement>();
 
-  const handleUpdate = (event: UpdateEvent) => {console.log(event)};
+  async function runQuery(databaseId: number, querySql: string): Promise<QueryFormData> {
+    return await SupersetClient
+      .post({
+        endpoint: `/api/v1/sqllab/execute/`,
+        jsonPayload: {
+          database_id: databaseId,
+          sql: querySql,
+        }
+      } as RequestConfig)
+      .then(res => res.json as QueryFormData)
+  }
+
+  // https://kysely.dev/docs/recipes/splitting-query-building-and-execution
+  interface Database {}
+  const db = new Kysely<Database>({
+    dialect: {
+      createAdapter: () => new PostgresAdapter(),
+      createDriver: () => new DummyDriver(),
+      createIntrospector: (db) => new PostgresIntrospector(db),
+      createQueryCompiler: () => new PostgresQueryCompiler(),
+    },
+  });
+
+  const buildAssignments = <T extends Record<string, unknown>>(
+    columnValueMap: T
+  ): RawBuilder<unknown>[] => (
+    Object.entries(columnValueMap).map(
+      ([key, value]) => sql`${sql.ref(key)} = ${sql.lit(value)}`
+    )
+  );
+
+  const handleUpdate = (event: UpdateEvent) => {
+    event.updates.forEach(({ newData, rowKey }) => {
+      const setClause = buildAssignments(newData);
+      const whereClause = buildAssignments(rowKey);
+      const query = sql`
+        UPDATE ${sql.table(datasource.name)}
+        SET ${sql.join(setClause)}
+        WHERE ${sql.join(whereClause, sql` AND `)}
+      `;
+      const querySql = query.compile(db).sql;
+      const databaseId = (datasource as any)?.database?.id;
+      runQuery(databaseId, querySql)
+        .then(res => console.log(res))
+        .catch(err => console.log(err))
+    })
+  };
   const handleInsert = (event: InsertEvent) => {console.log(event)};
   const handleDelete = (event: DeleteEvent) => {console.log(event)};
 
