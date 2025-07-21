@@ -41,6 +41,7 @@ import DataGrid, {
   InsertEvent,
   UpdateEvent,
 } from './components/DataGrid/DataGrid';
+import { message } from 'antd';
 
 const Styles = styled.div<DataGridChartStylesProps>`
   width: ${({ width }) => width}px;
@@ -106,8 +107,8 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
       const querySql = query.compile(db).sql;
       const databaseId = (datasource as any)?.database?.id;
       runQuery(databaseId, querySql)
-        .then(res => console.log(res))
-        .catch(err => console.log(err))
+        .then(res => message.success('Update successful'))
+        .catch(err => message.error('Update error'))
     })
   };
   const handleInsert = (event: InsertEvent) => {console.log(event)};
