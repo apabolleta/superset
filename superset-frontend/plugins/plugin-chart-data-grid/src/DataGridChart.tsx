@@ -23,15 +23,7 @@ import {
   SupersetClient,
 } from '@superset-ui/core';
 import { createRef } from 'react';
-import {
-  DummyDriver,
-  Kysely,
-  PostgresAdapter,
-  PostgresIntrospector,
-  PostgresQueryCompiler,
-  RawBuilder,
-  sql,
-} from 'kysely';
+import Knex from 'knex';
 import {
   DataGridChartStylesProps,
   DataGridChartTransformedProps,
@@ -42,6 +34,13 @@ import DataGrid, {
   UpdateEvent,
 } from './components/DataGrid/DataGrid';
 import { message } from 'antd';
+
+const DATABASE_BACKENDS_CLIENTS: Record<string, string> = {
+  postgresql: 'pg',
+  mysql: 'mysql',
+  sqlite: 'sqlite3',
+  mssql: 'mssql',
+};
 
 const Styles = styled.div<DataGridChartStylesProps>`
   width: ${({ width }) => width}px;
@@ -57,12 +56,21 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
     dataGrid,
   } = props;
   const {
+    is_editable,
     allow_update,
     allow_insert,
     allow_delete,
   } = formData;
 
   const rootElem = createRef<HTMLDivElement>();
+
+  const databaseId: number = (datasource as any)?.database?.id;
+  const databaseBackend: string = (datasource as any)?.database?.backend;
+  const datasourceName: string = datasource.name;
+
+  const knex = Knex({
+    client: DATABASE_BACKENDS_CLIENTS[databaseBackend]
+  });
 
   async function runQuery(databaseId: number, querySql: string): Promise<QueryFormData> {
     return await SupersetClient
@@ -76,51 +84,43 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
       .then(res => res.json as QueryFormData)
   }
 
-  // https://kysely.dev/docs/recipes/splitting-query-building-and-execution
-  interface Database {}
-  const db = new Kysely<Database>({
-    dialect: {
-      createAdapter: () => new PostgresAdapter(),
-      createDriver: () => new DummyDriver(),
-      createIntrospector: (db) => new PostgresIntrospector(db),
-      createQueryCompiler: () => new PostgresQueryCompiler(),
-    },
-  });
-
-  const buildAssignments = <T extends Record<string, unknown>>(
-    columnValueMap: T
-  ): RawBuilder<unknown>[] => (
-    Object.entries(columnValueMap).map(
-      ([key, value]) => sql`${sql.ref(key)} = ${sql.lit(value)}`
-    )
-  );
-
   const handleUpdate = (event: UpdateEvent) => {
     event.updates.forEach(({ newData, rowKey }) => {
-      const setClause = buildAssignments(newData);
-      const whereClause = buildAssignments(rowKey);
-      const query = sql`
-        UPDATE ${sql.table(datasource.name)}
-        SET ${sql.join(setClause)}
-        WHERE ${sql.join(whereClause, sql` AND `)}
-      `;
-      const querySql = query.compile(db).sql;
-      const databaseId = (datasource as any)?.database?.id;
+      const query = knex(datasourceName).where(rowKey).update(newData);
+      const querySql = query.toQuery();
       runQuery(databaseId, querySql)
         .then(res => message.success('Update successful'))
         .catch(err => message.error('Update error'))
-    })
+    });
   };
-  const handleInsert = (event: InsertEvent) => {console.log(event)};
-  const handleDelete = (event: DeleteEvent) => {console.log(event)};
+
+  const handleInsert = (event: InsertEvent) => {
+    event.inserts.forEach(({ newData, rowKey }) => {
+      const query = knex(datasourceName).insert({...newData, ...(rowKey ?? {})});
+      const querySql = query.toQuery();
+      runQuery(databaseId, querySql)
+        .then(res => message.success('Insert successful'))
+        .catch(err => message.error('Insert error'))
+    });
+  };
+
+  const handleDelete = (event: DeleteEvent) => {
+    event.deletes.forEach(({ rowKey }) => {
+      const query = knex(datasourceName).where(rowKey).delete();
+      const querySql = query.toQuery();
+      runQuery(databaseId, querySql)
+        .then(res => message.success('Delete successful'))
+        .catch(err => message.error('Delete error'))
+    });
+  };
 
   return (
     <Styles ref={rootElem} width={width} height={height}>
       <DataGrid
         {...dataGrid}
-        onUpdate={allow_update ? handleUpdate : undefined}
-        onInsert={allow_insert ? handleInsert : undefined}
-        onDelete={allow_delete ? handleDelete : undefined}
+        onUpdate={is_editable && allow_update ? handleUpdate : undefined}
+        onInsert={is_editable && allow_insert ? handleInsert : undefined}
+        onDelete={is_editable && allow_delete ? handleDelete : undefined}
       />
     </Styles>
   );

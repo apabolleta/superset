@@ -24,7 +24,7 @@
     "lib"
   ],
   "dependencies": {
-    "kysely": "^0.28.2"
+    "knex": "^3.1.0"
   },
   "peerDependencies": {
     "@superset-ui/chart-controls": "*",
