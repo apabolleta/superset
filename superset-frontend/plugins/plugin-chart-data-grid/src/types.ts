@@ -52,7 +52,7 @@ export type EditingType = 'row' | 'cell' | null;
 
 export type EditingMode = 'single' | 'multiple' | null;
 
-/** Column definition for data grid */
+/** Column definition */
 export interface ColumnDef<D extends DataRecord = DataRecord> {
   /** Unique identifier for the column */
   columnId?: string;
@@ -139,7 +139,7 @@ export interface ColumnDef<D extends DataRecord = DataRecord> {
   children?: ColumnDef<D>[];
 }
 
-/** Data grid definition */
+/** Data Grid definition */
 export interface DataGridDef<D extends DataRecord = DataRecord> {
   /** Column definitions */
   columns: ColumnDef<D>[];
@@ -174,7 +174,7 @@ export interface DataGridDef<D extends DataRecord = DataRecord> {
   /** Whether searching is enabled */
   searching?: boolean;
 
-  /** Whether data can be edited */
+  /** Whether editing is enabled */
   editing?: boolean;
 
   /** Editing type */
