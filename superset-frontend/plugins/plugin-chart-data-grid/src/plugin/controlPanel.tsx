@@ -92,22 +92,22 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           paginationControlSetItem,
-          paginationPageSizeControlSetItem
+          paginationPageSizeControlSetItem,
         ],
         [
           selectionControlSetItem,
           selectionTypeControlSetItem,
-          selectionModeControlSetItem
+          selectionModeControlSetItem,
         ],
         [
           sortingControlSetItem,
-          sortingModeControlSetItem
+          sortingModeControlSetItem,
         ],
         [filteringControlSetItem],
         [searchingControlSetItem],
         [
           importingControlSetItem,
-          exportingControlSetItem
+          exportingControlSetItem,
         ],
         [columnConfigControlSetItem],
       ],

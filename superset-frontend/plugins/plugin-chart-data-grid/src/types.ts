@@ -231,6 +231,8 @@ export type DataGridChartFormData = QueryFormData &
     sorting_mode?: SortingMode;
     filtering?: boolean;
     searching?: boolean;
+    importing?: boolean;
+    exporting?: boolean;
     column_config?: Record<string, ColumnConfig>;
     // visual formatting
     formatting_config?: FormattingConfig;

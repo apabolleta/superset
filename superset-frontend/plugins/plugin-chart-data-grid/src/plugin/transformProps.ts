@@ -55,6 +55,8 @@ export default function transformProps(
     filtering: formData.filtering,
     searching: formData.searching,
     editing: formData.is_editable ?? undefined,
+    importing: formData.importing,
+    exporting: formData.exporting,
   };
 
   return {

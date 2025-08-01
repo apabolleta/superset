@@ -16,10 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useRef } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  AllCommunityModule,
+  ICellRendererParams,
+  ModuleRegistry,
+  RowEditingStartedEvent,
+  RowEditingStoppedEvent,
+} from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { Flex, Input, Space } from '@superset-ui/core/components';
+import {
+  Button,
+  ConfirmStatusChange,
+  Flex,
+  Icons,
+  Input,
+  Space
+} from '@superset-ui/core/components';
 import { DataRecord, styled, t } from '@superset-ui/core';
 import { DataGridDef, RowKey } from 'src/types';
 
@@ -92,14 +111,166 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
 }: DataGridProps<D>) {
   const gridRef = useRef<AgGridReact>(null);
 
-  const columns = _columns.map((col) => ({
-    field: col.key as string,
-    headerName: col.header,
-  }));
+  const getRowKey = useCallback((row: D): RowKey => {
+    const entries = _columns
+      .filter(col => col.isRowKey)
+      .map(col => [col.key, row[col.key]]);
+    return Object.fromEntries(entries) as RowKey;
+  }, [_columns]);
 
-  const data = _data.map((row) => ({
+  const isEmptyRow = useCallback((row: D): boolean => {
+    const rowCopy = { ...row };
+    return !Object.values(rowCopy).some(value => value);
+  }, []);
+
+  const columns = useMemo(() => {
+    const dataColumns = _columns.map((col) => ({
+      field: col.key as string,
+      headerName: col.header,
+    }));
+
+    if (editing) {
+      const actionsColumn = {
+        colId: 'actions',
+        headerName: t('Actions'),
+        sortable: false,
+        filter: false,
+        editable: false,
+        suppressMenu: true,
+        suppressMovable: true,
+        suppressNavigable: true,
+        suppressPaste: true,
+        suppressKeyboardEvent: () => true,
+        suppressSizeToFit: true,
+        suppressAutoSize: true,
+        cellRenderer: (params: ICellRendererParams) => {
+          const [editingStatus, setEditingStatus] = useState<boolean | null>(editing ? false: null);
+          const [editingDisabled, setEditingDisabled] = useState<boolean | null>(editing ? false: null);
+
+          function onRowEditingStarted(event: RowEditingStartedEvent) {
+            if (params.node === event.node) {
+              setEditingStatus(true);
+            } else {
+              setEditingDisabled(true);
+            }
+          }
+
+          function onRowEditingStopped(event: RowEditingStoppedEvent) {
+            if (params.node === event.node) {
+              // TODO: check behaviour
+              if (isEmptyRow(event.data)) {
+                event.api.applyTransaction({ remove: [event.rowIndex] });
+                event.api.refreshCells({ force: true });
+              } else {
+                setEditingStatus(false);
+              }
+            } else {
+              setEditingDisabled(false);
+            }
+          }
+
+          useEffect(() => {
+            params.api.addEventListener('rowEditingStarted', onRowEditingStarted);
+            params.api.addEventListener('rowEditingStopped', onRowEditingStopped);
+
+            return () => {
+              params.api.removeEventListener('rowEditingStarted', onRowEditingStarted);
+              params.api.removeEventListener('rowEditingStopped', onRowEditingStopped);
+            };
+          }, []);
+
+          return (
+            editingStatus
+              ? (
+                <>
+                  <Button
+                    type='text'
+                    color='primary'
+                    variant='filled'
+                    disabled={!!editingDisabled}
+                    onClick={() => params.api.stopEditing(false)}
+                  >
+                    {t('Submit')}
+                  </Button>
+                  <ConfirmStatusChange
+                    title={t('Please confirm')}
+                    description={t('Are you sure you want to cancel the update?')}
+                    onConfirm={() => params.api.stopEditing(true)}
+                  >
+                    {showConfirm => (
+                      <Button
+                        type='text'
+                        color='danger'
+                        variant='filled'
+                        disabled={!!editingDisabled}
+                        onClick={showConfirm}
+                      >
+                        {t('Cancel')}
+                      </Button>
+                    )}
+                  </ConfirmStatusChange>
+                </>
+              ) : (
+                <>
+                  {onUpdate && (
+                    <Button
+                      type='text'
+                      color='default'
+                      variant='filled'
+                      disabled={!!editingDisabled}
+                      onClick={() => {
+                        params.api.startEditingCell({
+                          rowIndex: params.node?.rowIndex!,
+                          colKey: params.column?.getId()!,
+                        });
+                      }}
+                    >
+                      {t('Update')}
+                      <Icons.EditOutlined />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <ConfirmStatusChange
+                      title={t('Please confirm')}
+                      description={t('Are you sure you want to delete the row?')}
+                      onConfirm={() => {
+                        onDelete({
+                          type: 'delete',
+                          deletes: [{
+                            oldData: params.data,
+                            rowKey: getRowKey(params.data),
+                          }]
+                        });
+                      }}
+                    >
+                      {showConfirm => (
+                        <Button
+                          type='text'
+                          color='danger'
+                          variant='filled'
+                          disabled={!!editingDisabled}
+                          onClick={showConfirm}
+                        >
+                          {t('Delete')}
+                          <Icons.DeleteOutlined />
+                        </Button>
+                      )}
+                    </ConfirmStatusChange>
+                  )}
+                </>
+              )
+          );
+        },
+      };
+      return [...dataColumns, actionsColumn];
+    }
+
+    return dataColumns;
+  }, [_columns, editing]);
+
+  const data = useMemo(() => _data.map((row) => ({
     ...row,
-  }));
+  })), [_data]);
 
   return (
     <DataGridContainer vertical>
@@ -111,6 +282,17 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
             onChange={(e) => gridRef?.current?.api.setGridOption('quickFilterText', e.target.value)}
           />
         )}
+        {editing && onInsert && (
+          <Button
+            type='text'
+            color='default'
+            variant='filled'
+            onClick={() => {}}
+          >
+            {t('Insert')}
+            <Icons.PlusOutlined />
+          </Button>
+        )}
       </DataGridControlsContainer>
       <DataGridContentContainer>
         <AgGridReact
@@ -121,6 +303,7 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
             sortable: sorting,
             filter: filtering,
             editable: editing,
+            suppressKeyboardEvent: (params) => params.editing,
           }}
           pagination={pagination}
           paginationAutoPageSize={paginationPageSize === 0}
@@ -133,9 +316,10 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
           }
           suppressMultiSort={sortingMode === 'single'}
           alwaysMultiSort={sortingMode === 'multiple'}
-          editType={editingType === 'row' ? 'fullRow' : undefined}
+          suppressClickEdit={true}
+          editType={editing ? 'fullRow' : undefined}
           onCellValueChanged={
-            onUpdate
+            editing && onUpdate
               ? (event) => {
                 const { colDef, oldValue, newValue, data } = event;
                 onUpdate({
@@ -143,11 +327,7 @@ export default function DataGrid<D extends DataRecord = DataRecord>({
                   updates: [{
                     newData: {[colDef.field as keyof D]: newValue} as Partial<D>,
                     oldData: {[colDef.field as keyof D]: oldValue} as Partial<D>,
-                    rowKey: Object.fromEntries(
-                      _columns
-                        .filter(col => col.isRowKey)
-                        .map(col => [col.key, data[col.key]])
-                    )
+                    rowKey: getRowKey(data),
                   }]
                 })
               }

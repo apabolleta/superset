@@ -72,13 +72,13 @@ export default function DataGridChart(props: DataGridChartTransformedProps) {
     client: DATABASE_BACKENDS_CLIENTS[databaseBackend]
   });
 
-  async function runQuery(databaseId: number, querySql: string): Promise<QueryFormData> {
+  async function runQuery(databaseId: number, sql: string): Promise<QueryFormData> {
     return await SupersetClient
       .post({
         endpoint: `/api/v1/sqllab/execute/`,
         jsonPayload: {
           database_id: databaseId,
-          sql: querySql,
+          sql: sql,
         }
       } as RequestConfig)
       .then(res => res.json as QueryFormData)
